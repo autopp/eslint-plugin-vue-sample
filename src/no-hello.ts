@@ -15,14 +15,44 @@
 */
 
 import { Rule } from "eslint"
-import { Literal, TemplateElement } from "estree"
+import { Node, Literal, TemplateElement } from "estree"
+import { AST } from "vue-eslint-parser"
+
+interface VueEslintParserServices {
+  defineTemplateBodyVisitor(
+    templateBodyVisitor: { [key: string]: (...args: any) => void },
+    scriptVisitor?: { [key: string]: (...args: any) => void },
+    options?: { templateBodyTriggerSelector: "Program" | "Program:exit" },
+  ): Rule.RuleListener
+}
 
 export const noHello: Rule.RuleModule = {
   meta: {
     type: "problem",
   },
   create(context: Rule.RuleContext) {
-    return {
+    const jsListener =  {
+      Literal(node: Literal & Rule.NodeParentExtension) {
+        if (node.value === "hello") {
+          context.report({ node, message: '"hello" is not allowed' })
+        }
+      },
+      TemplateElement(node: TemplateElement & Rule.NodeParentExtension) {
+
+        if (node.value.cooked === "hello") {
+          context.report({ node, message: '"hello" is not allowed' })
+        }
+      },
     }
+
+    if (typeof context.parserServices?.defineTemplateBodyVisitor !== "function") {
+      return jsListener
+    }
+
+    const parserServices = context.parserServices as VueEslintParserServices
+    return parserServices.defineTemplateBodyVisitor(
+      jsListener,
+      jsListener
+    )
   }
 }
