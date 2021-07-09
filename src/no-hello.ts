@@ -51,7 +51,19 @@ export const noHello: Rule.RuleModule = {
 
     const parserServices = context.parserServices as VueEslintParserServices
     return parserServices.defineTemplateBodyVisitor(
-      jsListener,
+      {
+        VText(node: AST.VText) {
+          if (node.value === "hello") {
+            context.report({ loc: node.loc, message: '"hello" is not allowed' })
+          }
+        },
+        VLiteral(node: AST.VLiteral) {
+          if (node.value === "hello") {
+            context.report({ loc: node.loc, message: '"hello" is not allowed' })
+          }
+        },
+        ...jsListener
+      },
       jsListener
     )
   }
