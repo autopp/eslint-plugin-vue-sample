@@ -15,7 +15,7 @@
 */
 
 import { Rule } from "eslint"
-import { Node, Literal, TemplateElement } from "estree"
+import { Literal, TemplateElement } from "estree"
 import { AST } from "vue-eslint-parser"
 
 interface VueEslintParserServices {
